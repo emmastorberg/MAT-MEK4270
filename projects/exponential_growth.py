@@ -17,29 +17,33 @@ def solver(I, a, T, dt, theta):
 def exact(t, I=1, a=-1):
     return I*np.exp(-a*t)
 
-def A(t, theta, a=-1):
-    return (1 - (1-theta)*a*t)/(1 + theta*t*a)
+def A_exact(p):
+    return np.exp(-p)
 
-def amplification_factor(names, t):
+def A(p, theta):
+    return (1 - (1-theta)*p)/(1 + theta*p)
+
+def amplification_factor(names):
     curves = {}
-    curves['exact'] = exact(t)
-    plt.plot(t, curves['exact'])
-    #plt.hold('on')
+    p = np.linspace(0, 3, 16)
+    curves['exact'] = A_exact(p)
+    plt.plot(p, curves['exact'], color="black", linestyle="--")
+    #hold('on')
     name2theta = dict(FE=0, BE=1, CN=0.5)
     for name in names:
-        curves[name] = A(t, name2theta[name])
-        plt.plot(t, curves[name])
-    plt.plot([t[0], t[-1]], [0, 0], '--')  # A=0 line
+        curves[name] = A(p, name2theta[name])
+        plt.plot(p, curves[name])
+    #plt.plot([p[0], p[-1]], [0, 0], '--')  # A=0 line
     plt.title('Amplification factors')
     plt.grid('on')
-    plt.legend(['exact'] + names, loc='lower left', fancybox=True)
-    plt.xlabel(r'$t=a\Delta t$')
+    plt.legend(['Exact'] + names, loc='lower right', fancybox=True)
+    plt.xlabel(r'$p=a\Delta t$')
     plt.ylabel('Amplification factor')
     plt.show()
 
 if __name__ == '__main__':
 
-    dt_list = [(2.1, "#ffc100"), (1.25, "#c356ea"), (0.9, "#8ff243"), (0.2,"#71aef2") , (0.1,"#ea5645")]
+    dt_list = [(1.25, "#ffc100"), (0.8, "#c356ea"), (0.6, "#8ff243"), (0.2,"#71aef2") , (0.1,"#ea5645")]
 
     fig, axs = plt.subplots(1, 3, figsize=(16, 9))
 
@@ -51,7 +55,7 @@ if __name__ == '__main__':
     axs[0].set_title(r"Forward Euler schemes ($\theta = 0$)")
     axs[0].set_xlabel('t')
     axs[0].set_ylabel('Solution')
-    axs[0].set_ylim(0, 4000)
+    axs[0].set_ylim(-1000, 4000)
     axs[0].legend()
     axs[0].grid(True)
 
@@ -64,7 +68,7 @@ if __name__ == '__main__':
     axs[1].set_title(r'Crank-Nicolson schemes ($\theta = 0.5$)')
     axs[1].set_xlabel('t')
     axs[1].set_ylabel('Solution')
-    axs[1].set_ylim(0, 4000)
+    axs[1].set_ylim(-1000, 4000)
     axs[1].legend()
     axs[1].grid(True)
 
@@ -76,7 +80,7 @@ if __name__ == '__main__':
     axs[2].set_title(r'Backward Euler schemes ($\theta = 1$)')
     axs[2].set_xlabel('t')
     axs[2].set_ylabel('Solution')
-    axs[2].set_ylim(0, 4000)
+    axs[2].set_ylim(-1000, 4000)
     axs[2].legend()
     axs[2].grid(True)
 
@@ -84,9 +88,8 @@ if __name__ == '__main__':
     plt.tight_layout()
     plt.show()
 
-
     if len(sys.argv) > 1:
         names = sys.argv[1:]
     else: # default
         names = 'FE BE CN'.split()
-    amplification_factor(names, t)
+    amplification_factor(names)
