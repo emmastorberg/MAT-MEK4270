@@ -12,77 +12,40 @@ def solver(I, a, T, dt, theta):
         u[n+1] = (1 - (1-theta)*a*dt)/(1 + theta*dt*a)*u[n]
     return u, t
 
-dt_list = [1, 0.8, 0.2, 0.1, 0.01]
+dt_list = [(0.8, "#4E79A7"), (0.5, "#F28E2B"), (0.2, "#76B7B2"), (0.1,"#E15759") , (0.01,"#B07AA1")]
 
-for i in range(len(dt_list)):
-    exec(f"FE{i}"), t = solver(I=1, a=-1, T=8, dt=dt_list[i], theta=0)    # Forward Euler schemes
-    exec(f"CN{i}"), t = solver(I=1, a=-1, T=8, dt=dt_list[i], theta=0.5)  # Crank-Nicolson schemes
-    exec(f"BE{i}"), t = solver(I=1, a=-1, T=8, dt=dt_list[i], theta=1)    # Backward Euler schemes
+fig, axs = plt.subplots(1, 3, figsize=(16, 9))
 
-fig, axs = plt.subplots(3, 1, figsize=(8, 12))
+for dt in dt_list:
+    FE, t = solver(I=1, a=-1, T=8, dt=dt[0], theta=0)    # Forward Euler schemes
+    axs[0].plot(t, FE, label=f"dt = {dt[0]}", color=dt[1])
+    axs[0].set_title("Forward Euler schemes (theta = 0)")
+    axs[0].set_xlabel('t')
+    axs[0].set_ylabel('Solution')
+    axs[0].set_ylim(0, 5000)
+    axs[0].legend()
+    axs[0].grid(True)
 
-# Plot Finite Difference Method solution
-for i in range(len(dt_list)):
-    axs[0].plot(t, exec(f"FE{i}"), label="Forward Euler schemes", color='b')
-    axs[1].plot(t, exec(f"CN{i}"), label="Crank-Nicolson schemes", color='r')
-    axs[2].plot(t, exec(f"BE{i}"), label="Backward Euler schemes", color='g')
+for dt in dt_list:
+    CN, t = solver(I=1, a=-1, T=8, dt=dt[0], theta=0.5)  # Crank-Nicolson schemes
+    axs[1].plot(t, CN, label=f"dt = {dt[0]}", color=dt[1])
+    axs[1].set_title('Crank-Nicolson schemes (theta = 0.5)')
+    axs[1].set_xlabel('t')
+    axs[1].set_ylabel('Solution')
+    axs[1].set_ylim(0, 5000)
+    axs[1].legend()
+    axs[1].grid(True)
 
-axs[0].set_title("Forward Euler schemes (theta = 0)")
-axs[0].set_xlabel('t')
-axs[0].set_ylabel('Solution')
-axs[0].legend()
-axs[0].grid(True)
-
-axs[1].set_title('Crank-Nicolson schemes (theta = 0.5)d')
-axs[1].set_xlabel('t')
-axs[1].set_ylabel('Solution')
-axs[1].legend()
-axs[1].grid(True)
-
-axs[2].set_title('Backward Euler schemes (theta = 1)')
-axs[2].set_xlabel('t')
-axs[2].set_ylabel('Solution')
-axs[2].legend()
-axs[2].grid(True)
+for dt in dt_list:
+    BE, t = solver(I=1, a=-1, T=8, dt=dt[0], theta=1)    # Backward Euler schemes
+    axs[2].plot(t, BE, label=f"dt = {dt[0]}", color=dt[1])
+    axs[2].set_title('Backward Euler schemes (theta = 1)')
+    axs[2].set_xlabel('t')
+    axs[2].set_ylabel('Solution')
+    axs[2].set_ylim(0, 5000)
+    axs[2].legend()
+    axs[2].grid(True)
 
 # Adjust layout and show the figure
 plt.tight_layout()
 plt.show()
-
-
-
-"""
-from scitools.std import *
-
-def A_exact(p):
-    return np.exp(-p)
-
-def A(p, theta):
-    return (1-(1-theta)*p)/(1+theta*p)
-
-def amplification_factor(names):
-    curves = {}
-    p = np.linspace(0, 3, 15)
-    curves['exact'] = A_exact(p)
-    plt.plot(p, curves['exact'])
-    plt.hold('on')
-    name2theta = dict(FE=0, BE=1, CN=0.5)
-    for name in names:
-        curves[name] = A(p, name2theta[name])
-        plot(p, curves[name])
-    plt.plot([p[0], p[-1]], [0, 0], '--')  # A=0 line
-    plt.title('Amplification factors')
-    plt.grid('on')
-    plt.legend(['exact'] + names, loc='lower left', fancybox=True)
-    plt.xlabel('$p=a\Delta t$')
-    plt.ylabel('Amplification factor')
-    plt.savefig('A_factors.png')
-    plt.savefig('A_factors.pdf')
-    plt.show()
-
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        names = sys.argv[1:]
-    else: # default
-        names = 'FE BE CN'.split()
-    amplification_factor(names)"""
