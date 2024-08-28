@@ -6,7 +6,7 @@ def differentiate(u, dt):
 
     d[0] = (u[1] - u[0])/dt             # First value
     for i in range(1, len(d)-1):        # Middle values (for-loop)
-        d[i] = (u[i+1] - u[i-1])/2*dt
+        d[i] = (u[i+1] - u[i-1])/(2*dt)
     d[-1] = (u[-1] - u[-2])/dt          # Last value
 
     return d
