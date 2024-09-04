@@ -25,7 +25,7 @@ def A(p, theta):
 
 def amplification_factor(names):
     curves = {}
-    p = np.linspace(0, 3, 16)
+    p = np.linspace(-3, 0, 16)
     curves['exact'] = A_exact(p)
     plt.plot(p, curves['exact'], color="black", linestyle="--")
     #hold('on')

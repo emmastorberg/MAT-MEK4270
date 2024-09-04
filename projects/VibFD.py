@@ -10,6 +10,7 @@ We use various boundary conditions.
 import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sp
+from scipy import sparse
 
 t = sp.Symbol('t')
 
@@ -141,7 +142,17 @@ class VibFD2(VibSolver):
         assert T.is_integer() and T % 2 == 0
 
     def __call__(self):
-        u = np.zeros(self.Nt+1)
+        diagonals = [1/self.dt**2, -2/self.dt**2 + self.w**2, 1/self.dt**2]
+        offsets = [-1, 0, 1]
+        A = sparse.diags(diagonals, offsets, (self.Nt+1, self.Nt+1), "csr")
+        A[0, :2] = 1, 0
+        A[-1, -2:] = 0, 1
+
+        b = np.zeros(self.Nt+1)
+        b[0] = self.I; b[-1] = self.I
+
+        u = sparse.linalg.spsolve(A, b)
+
         return u
 
 class VibFD3(VibSolver):
@@ -161,7 +172,17 @@ class VibFD3(VibSolver):
         assert T.is_integer() and T % 2 == 0
 
     def __call__(self):
-        u = np.zeros(self.Nt+1)
+        diagonals = [1/self.dt**2, -2/self.dt**2 + self.w**2, 1/self.dt**2]
+        offsets = [-1, 0, 1]
+        A = sparse.diags(diagonals, offsets, (self.Nt+1, self.Nt+1), "csr")
+        A[0, :2] = 1, 0
+        A[-1, -3:] = 1/(2*self.dt), -2/self.dt, 3/(2*self.dt)
+
+        b = np.zeros(self.Nt+1)
+        b[0] = self.I; b[-1] = 0
+
+        u = sparse.linalg.spsolve(A, b)
+
         return u
 
 class VibFD4(VibFD2):
@@ -175,7 +196,20 @@ class VibFD4(VibFD2):
     order = 4
 
     def __call__(self):
-        u = np.zeros(self.Nt+1)
+        denom = (12*self.dt**2)
+        diagonals = [-1/denom, 16/denom, -30/denom + self.w**2, 16/denom, -1/denom]
+        offsets = [-2, -1, 0, 1, 2]
+        A = sparse.diags(diagonals, offsets, (self.Nt+1, self.Nt+1), "csr")
+        A[0, :3] = 1, 0, 0
+        A[1, :6] = 10/denom, -15/denom + self.w**2, -4/denom, 14/denom, -6/denom, 1/denom
+        A[-2, -6:] = 1/denom, -6/denom, 14/denom, -4/denom, -15/denom + self.w**2, 10/denom
+        A[-1, -3:] = 0, 0, 1
+
+        b = np.zeros(self.Nt+1)
+        b[0] = self.I; b[-1] = self.I
+
+        u = sparse.linalg.spsolve(A, b)
+
         return u
 
 def test_order():
