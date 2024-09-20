@@ -50,15 +50,19 @@ class Wave1D:
         The returned matrix is not divided by dx**2
         """
         D = sparse.diags([1, -2, 1], [-1, 0, 1], (self.N + 1, self.N + 1), "lil")
-        if bc == 0: 
+        if bc["left"] == 0: 
             D[0, :2] = 0, 0
+
+        if bc["right"] == 0:
             D[-1, -2:] = 0, 0
 
-        elif bc == 1:  # Neumann condition is baked into stencil
+        if bc["left"] == 1:  # Neumann condition is baked into stencil
             D[0, 1] = 2
+
+        if bc["right"] == 1:  # Neumann condition is baked into stencil
             D[-1, -2] = 2
 
-        elif bc == 3:  # periodic (Note u[0] = u[-1])
+        if bc["left"] == 3 and bc["right"] == 3:  # periodic (Note u[0] = u[-1])
             D[0, -2] = 1
 
         return D
@@ -85,18 +89,21 @@ class Wave1D:
             # u[-1] = 0
             pass
 
-        elif bc == 1:  # Neumann condition
+        if bc == 1:  # Neumann condition
             pass
 
-        elif bc == 2:  # Open boundary
+        if bc["left"] == 2:  # Open boundary
             c = self.cfl
             u[0] = 2*(1-c)*self.un[0] - (1-c)/(1+c)*self.unm1[0] + 2*c**2/(1+c)*self.un[1]
+
+        if bc["right"] == 2:  # Open boundary
+            c = self.cfl
             u[-1] = 2*(1-c)*self.un[-1] - (1-c)/(1+c)*self.unm1[-1] + 2*c**2/(1+c)*self.un[-2]
 
-        elif bc == 3:
+        if bc["left"] == 3 and bc["right"] == 3:
             u[-1] = u[0]
 
-        else:
+        elif bc["left"] not in [0,1,2] or bc["right"] not in [0,1,2]:
             raise RuntimeError(f"Wrong bc = {bc}")
 
     @property
@@ -132,6 +139,9 @@ class Wave1D:
         each value is an array of length N+1
 
         """
+        if isinstance(bc, int):
+            bc = {"left": bc, "right": bc}
+
         D = self.D2(bc)
         self.cfl = C = self.cfl if cfl is None else cfl
         dt = self.dt
