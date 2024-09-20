@@ -92,6 +92,7 @@ class Poisson2D:
         return sparse.linalg.spsolve(A, b.ravel()).reshape((self.px.N+1, self.py.N+1))
 
 def test_poisson2d():
+    # Test 1:
     Lx = 2; Ly = 2; N = 100
     sol = Poisson2D(Lx, Ly, N, N)
 
@@ -100,6 +101,16 @@ def test_poisson2d():
     bcy = (ue.subs(y, 0), ue.subs(y, Ly))
     u = sol(bcx, bcy, f=(sp.diff(ue, x, 2) + sp.diff(ue, y, 2)))
     assert sol.l2_error(u, ue) < 1e-12
+
+    # Test 2:
+    Lx = 4; Ly = 3; Nx = 300; Ny = 250
+    sol = Poisson2D(Lx, Ly, Nx, Ny)
+
+    ue = sp.exp(y - x)*sp.cos(x) - y**4
+    bcx = (ue.subs(x, 0), ue.subs(x, Lx))
+    bcy = (ue.subs(y, 0), ue.subs(y, Ly))
+    u = sol(bcx, bcy, f=(sp.diff(ue, x, 2) + sp.diff(ue, y, 2)))
+    assert sol.l2_error(u, ue) < 1e-3
 
 if __name__ == "__main__":
     test_poisson2d()
